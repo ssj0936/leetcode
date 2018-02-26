@@ -2,97 +2,55 @@
  * @param {string} str
  * @return {number}
  */
-var myAtoi = function (str) {
+var myAtoi = function(str) {
+    //no need to parse empty string
+    if (str.length == 0) return 0;
+
     const INT_MAX = 2147483647,
         INT_MIN = -2147483648,
         NUMBER = "0123456789";
 
-    if(str.length == 0) return 0;
-
-    var signDetected = false,
-        hasPassingAnyChar = false,
-        isFirstChar = false,
-
-        isNumberThroughing = false,
-        isPrevCharNumber = false,
-        isPrevCharSign = false;
-
-    var sign = 1;
-    var number = [];
-    var finalResult;
-    for (var i = 0; i < str.length; ++i) {
-        var char = str.charAt(i);
-        if (char == ' ' && !hasPassingAnyChar) {
-            continue;
-        }
-
-        hasPassingAnyChar = true;
-
-        //first char
-        if (hasPassingAnyChar && !isFirstChar) {
-            if (!isNumber(char) && char != '+' && char != '-') {
-                //no number
-                return 0;
-            } else if (isNumber(char)) {
-                if(char == '0') continue;
-                isNumberThroughing = true;
-                sign = 1;
-                number.push(char);
-            } else if (char == '+') {
-                sign = 1;
-                isPrevCharSign = true;
-            } else if (char == '-') {
-                sign = -1;
-                isPrevCharSign = true;
-            }
-            isFirstChar = true;
-        }
-        //not first char
-        else {
-            if(!isNumberThroughing && !isNumber(char)){
-                finalResult = null;
-                return 0;
-            }else if(isNumberThroughing && !isNumber(char)){
-                //收尾
-                return finalProcess(number);
-            }else if(!isNumberThroughing && isNumber(char)){
-                //第一個數字
-                if(isPrevCharSign && isNumber(char)){
-                    if(char == '0') continue;
-                    isNumberThroughing = true;
-                    isPrevCharSign = false;
-                    number.push(char);
-                }else if(!isPrevCharSign && isNumber(char)){
-                    number.push(char);
-                }else if(isPrevCharSign && !isNumber(char)){
-                    return 0;
-                }
-            }else if(isNumberThroughing && isNumber(char)){
-                number.push(char);
-            }
-        }
+    //remove empty part
+    var index = 0;
+    while (str[index] == ' ') {
+        ++index;
     }
-    return finalProcess(number);
+    str = str.slice(index, str.length);
+    if (str.length == 0) return 0;
 
-    function isNumber(char){
-        return NUMBER.indexOf(char)!=-1;
+    //extract number part
+    var sign = null,
+        number = null;
+
+    if (str[0] == "+" || str[0] == "-") {
+        sign = str.slice(0, 1);
+        str = str.slice(1, str.length);
+        if (str.length == 0) return 0;
     }
 
-    function arrToNumber(arr){
+    index = 0;
+    while (NUMBER.indexOf(str[index]) != -1) ++index;
+    number = str.slice(0, index);
+
+    //convert to number
+    number = arrToNumber(number);
+
+    if (sign != null && sign == "-") {
+        number = -1 * number;
+    }
+
+    if (number > INT_MAX) return INT_MAX;
+    else if (number < INT_MIN) return INT_MIN;
+    else return number;
+
+    function arrToNumber(arr) {
         var length = arr.length,
             result = 0;
 
-        for(let i =0;i<length;++i){
-            result += arr[i]*Math.pow(10,(length-i-1));
+        for (let i = 0; i < length; ++i) {
+            result += arr[i] * Math.pow(10, (length - i - 1));
         }
         return result;
-    }
-
-    function finalProcess(arr){
-        var finalResult = sign * arrToNumber(arr);
-        if(finalResult>INT_MAX) return INT_MAX;
-        else if(finalResult<INT_MIN) return INT_MIN;
-        else return finalResult;
     }
 };
 
