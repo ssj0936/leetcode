@@ -29,7 +29,7 @@
 // Output: 0
 // Explanation: The endWord "cog" is not in wordList, therefore no possible transformation.
 
-class Solution {
+class Solution127 {
     fun ladderLength(beginWord: String, endWord: String, wordList: List<String>): Int {
         if(!wordList.contains(endWord)) return 0
         
@@ -67,6 +67,6 @@ fun main(args: Array<String>) {
     val beginWord:String = "hit"
     val endWord:String = "cog"
     // val sol = Solution()
-    var result = Solution().ladderLength(beginWord,endWord,wordList)
+    var result = Solution127().ladderLength(beginWord,endWord,wordList)
     println(result)
 }

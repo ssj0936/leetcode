@@ -10,7 +10,7 @@
 // return [0, 1].
 
 
-class Solution {
+class Solution1 {
   fun twoSum(nums: IntArray, target: Int): IntArray? {
     for(i in 0..nums.size-1){
       for(j in i..nums.size-1){
@@ -27,7 +27,7 @@ class Solution {
 fun main(args: Array<String>) {
   val nums = intArrayOf(2, 7, 11, 15)
   val target = 9
-  val sol = Solution()
+  val sol = Solution1()
   val result = sol.twoSum(nums,target)
   println(result?.contentToString())
 }

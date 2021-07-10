@@ -9,7 +9,7 @@
 // Follow up:
 // Could you solve it with constant space complexity? (The output array does not count as extra space for the purpose of space complexity analysis.)
 
-class Solution {
+class Solution238 {
     fun productExceptSelf(nums: IntArray): IntArray {
       var left = IntArray(nums.size)
       var right = IntArray(nums.size)
@@ -31,7 +31,7 @@ class Solution {
 
 fun main() {
   var nums:IntArray = intArrayOf(1,2,3,4)
-  var s = Solution()
+  var s = Solution238()
   var result = s.productExceptSelf(nums)
   println(result.contentToString())
 }
