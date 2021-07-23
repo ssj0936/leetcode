@@ -75,7 +75,7 @@ class NumMatrix(private val matrix: Array<IntArray>) {
     /*
     本來以為hashmap會快，但以pair當作是key不是一個好方法，會拖慢速度，不如直接用2D array
      */
-    
+
     /*
     一個小細節，dp的size加大一級
     因為最後在區域切割時，起點是要exclusive的，既然如此在創DP時就直接拉大一格，否則再算exceedLimit的時候會很難處理
