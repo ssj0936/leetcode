@@ -5,7 +5,7 @@ plugins {
     application
 }
 
-group = "me.timothy"
+group = "me.timothy_chung"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -17,10 +17,10 @@ dependencies {
 }
 
 tasks.test {
-    useJUnitPlatform()
+    useJUnit()
 }
 
-tasks.withType<KotlinCompile> {
+tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
 }
 
