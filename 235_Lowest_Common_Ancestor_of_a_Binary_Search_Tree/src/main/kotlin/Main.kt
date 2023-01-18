@@ -86,3 +86,19 @@ class Solution {
         return queue
     }
 }
+
+class Solution02 {
+    fun lowestCommonAncestor(root: TreeNode, p: TreeNode?, q: TreeNode?): TreeNode? {
+        return when {
+            p == null || q == null -> null
+            root.value == p.value || root.value == q.value -> root
+            root.value in p.value..q.value || root.value in q.value..p.value -> root
+            p.value < root.value -> lowestCommonAncestor(root.left!!, p, q)
+            p.value > root.value -> lowestCommonAncestor(root.right!!, p, q)
+            else -> null
+        }
+    }
+
+    val TreeNode.value: Int
+        get() = this.`val`
+}
