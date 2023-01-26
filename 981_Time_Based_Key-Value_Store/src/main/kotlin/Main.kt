@@ -46,15 +46,13 @@ fun main(args: Array<String>) {
 }
 
 class TimeMap() {
+    fun Pair<Int, String>.getTimeStamp():Int = this.first
+    fun Pair<Int, String>.getValue():String = this.second
 
     //Pair(timeStamp, value)
     private val map:HashMap<String, MutableList<Pair<Int, String>>> = HashMap()
     fun set(key: String, value: String, timestamp: Int) {
-
-        val newValue = map.getOrDefault(key, mutableListOf()).apply {
-            add(Pair(timestamp, value))
-        }
-        map[key] = newValue
+        map.getOrPut(key){ mutableListOf() }.add(Pair(timestamp, value))
     }
 
     fun get(key: String, timestamp: Int): String {
@@ -64,7 +62,7 @@ class TimeMap() {
         if(valueList!=null){
             var index = binarySearch(valueList, timestamp)
             if(index != -1)
-                result = valueList[index].second
+                result = valueList[index].getValue()
         }
         return result
     }
@@ -77,13 +75,13 @@ class TimeMap() {
         while(head<=tail){
             val mid = (head+tail)/2
 
-            if(list[mid].first == targetTimeStamp) {
+            if(list[mid].getTimeStamp() == targetTimeStamp) {
                 result = mid
                 flagBingo = true
                 break
             }
 
-            if (list[mid].first < targetTimeStamp){
+            if (list[mid].getTimeStamp() < targetTimeStamp){
                 head = mid+1
             }else{
                 tail = mid-1
