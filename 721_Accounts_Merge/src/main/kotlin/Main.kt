@@ -75,3 +75,87 @@ class Solution {
         return result
     }
 }
+
+class Solution02 {
+    fun accountsMerge(accounts: List<List<String>>): List<List<String>> {
+        //key值為name，value是另一個hashMap，記錄每一個email的parent是誰
+        //藉由這個parentMap 來推出每一個點的root是誰
+        val accountMap = HashMap<String, HashMap<String, String>>()
+        for (account in accounts) {
+            val name = account[0]
+            val parentMap = accountMap.getOrPut(name){HashMap()}
+            //first insert of this Name
+            if(parentMap.size==0){
+                //parentMap塞入每一個email parent都是這個account的第一個email(以第一個email當root)
+                for(i in 1 .. account.lastIndex){
+                    parentMap.put(account[i],account[1])
+                }
+            }
+            //find overlapped and union
+            //這個account的email們分兩部分：
+            // 1.有出現在其他account裡：把這些重疊到的group記錄下來
+            // 2.沒有出現在其他account裡：這部分的email自成一group
+            //把這些group全部union起來
+            else{
+                val overlapped = mutableSetOf<String>()
+                val theRest = mutableSetOf<String>()
+                for(i in 1 .. account.lastIndex){
+                    val root = findRoot(parentMap, account[i])
+                    if(root != null){
+                        overlapped.add(root)
+                    }else{
+                        theRest.add(account[i])
+                    }
+                }
+
+                //(2)的部份，自己union起來成一個group
+                union(parentMap, theRest)?.let {
+                    overlapped.add(it)
+                }
+
+                //(1)和(2)全部union起來
+                union(parentMap,overlapped)
+            }
+        }
+
+        //整理output
+        val r = mutableListOf<List<String>>()
+        for((name, hashmap) in accountMap){
+            val hash = HashMap<String, MutableList<String>>()
+            for((email,parent) in hashmap){
+                val root = findRoot(hashmap, email)
+                hash.getOrPut(root!!,::mutableListOf).add(email)
+            }
+
+            for((_, value) in hash){
+                val subResult = mutableListOf(name)
+                subResult.addAll(value.sorted())
+                r.add(subResult)
+            }
+        }
+        return r
+    }
+
+    //固定把第一個點當作新的root，其他的點設定自己的parent為newRoot
+    private fun union(map:HashMap<String, String>, setOfRoot:Set<String>):String?{
+        if(setOfRoot.isEmpty())
+            return null
+
+        val newRoot = setOfRoot.elementAt(0)
+        for(root in setOfRoot){
+            map.put(root, newRoot)
+        }
+        return newRoot
+    }
+
+    //從一個點開始根本溯源把root找出來
+    private fun findRoot(map:HashMap<String, String>, node:String):String?{
+        if(map.get(node) == null) return null
+        if(map.get(node) == node) return node
+
+        //這裡用一個trick，因為這個map的最終用途是要找root，所以中間他的parent都不是重點所以在recursive的過程中，也同時去改寫map中的parent值
+        val parent:String = map.get(node)!!
+        map.put(node, findRoot(map, parent)!!)
+        return map.get(node)
+    }
+}
