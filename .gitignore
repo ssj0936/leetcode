@@ -49,3 +49,5 @@ Temporary Items
 1.Two Sum/kotlin.jar
 .vscode/settings.json
 **/build/*
+
+leetcodeCommon/*
