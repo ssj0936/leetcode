@@ -45,12 +45,16 @@ class TreeNode(var `val`: Int) {
     var right: TreeNode? = null
 }
 
-class Solution {
-    fun rightSideView(root: TreeNode?): List<Int> {
+interface Sol{
+    fun rightSideView(root: TreeNode?): List<Int>
+}
+
+class SolutionIterative:Sol {
+    override fun rightSideView(root: TreeNode?): List<Int> {
         if(root == null)
             return mutableListOf<Int>()
 
-        val nodeList = mutableListOf<TreeNode>().apply {
+        var nodeList = mutableListOf<TreeNode>().apply {
             add(root)
         }
 
@@ -58,16 +62,62 @@ class Solution {
             add(root.`val`)
         }
 
-        var headPointer = 0
-        while (headPointer < nodeList.size){
-            val originSize = nodeList.lastIndex - headPointer +1
-            repeat(originSize){
-                val node = nodeList[headPointer++]
-                node.left?.let { nodeList.add(it) }
-                node.right?.let { nodeList.add(it) }
+        while (nodeList.isNotEmpty()){
+            val newNodeList = mutableListOf<TreeNode>()
+            for(node in nodeList){
+                node.left?.let { newNodeList.add(it) }
+                node.right?.let { newNodeList.add(it) }
             }
-            result.add(nodeList.last().`val`)
+            nodeList = newNodeList
+            if(nodeList.isNotEmpty())
+                result.add(nodeList.last().`val`)
         }
         return result
+    }
+}
+
+class SolutionRecursive:Sol {
+    private val result = mutableListOf<Int>()
+    override fun rightSideView(root: TreeNode?): List<Int> {
+        if(root == null)
+            return listOf()
+
+        foo(listOf(root))
+        return result
+    }
+
+    private fun foo(list: List<TreeNode>){
+        if(list.isEmpty())
+            return
+
+        result.add(list.last().`val`)
+        val newList = mutableListOf<TreeNode>()
+        for(node in list){
+            node.left?.let { newList.add(it) }
+            node.right?.let { newList.add(it) }
+        }
+        foo(newList)
+    }
+}
+
+class SolutionRecursiveV2:Sol {
+    private val result = mutableListOf<Int>()
+
+    override fun rightSideView(root: TreeNode?): List<Int> {
+        foo(root, 0)
+        return result
+    }
+
+    private fun foo(root: TreeNode?, depth:Int) {
+        if(root == null)
+            return
+
+        if(result.size == depth)
+            result.add(root.`val`)
+
+        if(root.right!=null)
+            foo(root.right, depth+1)
+        if(root.left!=null)
+            foo(root.left, depth+1)
     }
 }
