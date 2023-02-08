@@ -209,6 +209,42 @@ class Solution03:Sol {
     }
 }
 
+class Solution04:Sol {
+    var preIndex = 0
+    override fun buildTree(preorder: IntArray, inorder: IntArray): TreeNode? {
+        val inMap = HashMap<Int, Int>()
+        for (i in inorder.indices) {
+            inMap.put(inorder[i], i)
+        }
+
+        return foo(preorder, 0, inorder.lastIndex, inMap)
+    }
+
+    private fun foo(preorder: IntArray,inLeft:Int, inRight:Int, inMap: HashMap<Int, Int>):TreeNode?{
+        if(inLeft>inRight) // empty array
+            return null
+
+        if(inLeft==inRight)
+            return TreeNode(preorder[preIndex++])
+
+        val root = preorder[preIndex++]
+        val rootIndex = inMap.get(root) ?: -1
+
+        //left child inorder
+        val leftInorderLeft:Int = inLeft
+        val leftInorderRight:Int = rootIndex-1
+
+        //right child inorder
+        var rightInorderLeft:Int = rootIndex+1
+        var rightInorderRight:Int = inRight
+
+        return TreeNode(root).apply {
+            left = foo(preorder,leftInorderLeft,leftInorderRight,inMap)
+            right = foo(preorder,rightInorderLeft,rightInorderRight,inMap)
+        }
+    }
+}
+
 /*備註：
 看到這個解法鰻屌的，既然都是用prefix第一位開始，prefix就是中左右
 那遞迴的順序照著中間(本次會處理完) 左邊 右邊遞迴，那就可以prefix順著一位一位切下來，專注在inorder上就好
