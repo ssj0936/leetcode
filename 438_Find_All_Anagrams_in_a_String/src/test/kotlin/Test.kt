@@ -7,7 +7,7 @@ class Test {
 
     @Before
     fun setup(){
-        solution = SolutionSlidingWindow()
+        solution = SolutionSlidingWindow2()
     }
 
     @Test

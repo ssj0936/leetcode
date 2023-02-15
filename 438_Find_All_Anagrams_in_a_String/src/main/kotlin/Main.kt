@@ -28,6 +28,8 @@ fun main(args: Array<String>) {
 
     // Try adding program arguments at Run/Debug configuration
     println("Program arguments: ${args.joinToString()}")
+    println('a'.toInt())
+    println('z'.toInt())
 }
 
 interface Sol{
@@ -106,36 +108,56 @@ class SolutionSlidingWindow:Sol {
     override fun findAnagrams(s: String, p: String): List<Int> {
         if(p.length>s.length)
             return listOf()
+        val pSize = p.length
+        val mapP = Array(26){0}
+        for(char in p) ++mapP[charToIntConverter(char)]
 
-        val mapP = HashMap<Char,Int>()
-        for(char in p){
-            mapP[char] = mapP.getOrDefault(char, 0)+1
-        }
-        var head = 0
-        var validCount = p.length
         val result = mutableListOf<Int>()
+        val mapS = Array<Int>(26){0}
+        for(index in s.indices){
+            ++mapS[charToIntConverter(s[index])]
+            if(index>=pSize)
+                --mapS[charToIntConverter(s[index-pSize])]
 
-        for(tail in s.indices){
-            val charCount = mapP.getOrPut(s[tail]){0}
-            if(charCount>0){
-                --validCount
-            }
-            mapP.put(s[tail], charCount-1)
-
-            if(validCount==0)
-                result.add(head)
-
-            val charCount2 = mapP.getOrPut(s[head]){0}
-            if(tail-head == s.length){
-                if(charCount2 >=0){
-                    ++validCount
-                }
-                ++head
-                mapP.put(s[head], charCount2+1)
-
+            if(index>=pSize-1 && mapP.contentDeepEquals(mapS)){
+                result.add(index-pSize+1)
             }
         }
 
         return result
+    }
+
+    private fun charToIntConverter(char:Char):Int{
+        return char - 'a'
+    }
+}
+
+class SolutionSlidingWindow2:Sol {
+    override fun findAnagrams(s: String, p: String): List<Int> {
+        if(p.length>s.length)
+            return listOf()
+        val pSize = p.length
+        val mapP = Array(26){0}
+        for(char in p) ++mapP[charToIntConverter(char)]
+
+        //mapP裡裝的就是windows中所需的元素個數
+        //討論最順利的狀況：進來的p.lenth位剛好組成p的anagram，map的分數全部被扣掉，全都是0
+        //假設進來一個髒東西，map會被記一點，所以只要window裡面有這個東西，一定不會全部為0，一定要index一直走，把它排除在window外他才會被扣掉，window的寬度剛好就p.length
+        val result = mutableListOf<Int>()
+        for(index in s.indices){
+            --mapP[charToIntConverter(s[index])]
+            if(index>=pSize)
+                ++mapP[charToIntConverter(s[index-pSize])]
+
+            if(index>=pSize-1 && mapP.all { it==0 }){
+                result.add(index-pSize+1)
+            }
+        }
+
+        return result
+    }
+
+    private fun charToIntConverter(char:Char):Int{
+        return char - 'a'
     }
 }
