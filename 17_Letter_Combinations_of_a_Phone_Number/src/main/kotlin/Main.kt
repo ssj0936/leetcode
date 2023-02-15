@@ -57,7 +57,7 @@ class Solution:Sol {
         val sizeList = mutableListOf<Int>()
         for(digit in digits){
             outputSize *= map[digit.toNumber()]!!.size
-            sizeList.add(digit.toNumber())
+            sizeList.add(map[digit.toNumber()]!!.size)
         }
 
         for(i in 0 .. outputSize-1){
@@ -66,11 +66,11 @@ class Solution:Sol {
             for(j in digits.indices){
                 var char = digits[j].toNumber()
 
-                val sizeInThisDigit:Int = map.get(sizeList[j])!!.size
+                val sizeInThisDigit:Int = sizeList[i]
                 val index = tmp % sizeInThisDigit
                 val r = map[char]!!.get(index)
                 subResult+=r
-                tmp = tmp / map[char]!!.size
+                tmp /= sizeInThisDigit
             }
             result.add(subResult)
         }
