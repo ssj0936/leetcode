@@ -7,7 +7,7 @@ class Test {
 
     @Before
     fun setup(){
-        solution = Solution2()
+        solution = Solution3()
     }
 
     @Test

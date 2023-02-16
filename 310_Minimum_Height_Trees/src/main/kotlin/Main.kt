@@ -1,3 +1,5 @@
+import java.util.LinkedList
+
 /*
 310. Minimum Height Trees
 A tree is an undirected graph in which any two vertices are connected by exactly one path. In other words, any connected graph without simple cycles is a tree.
@@ -67,10 +69,9 @@ class Solution:Sol {
 }
 
 class Solution2:Sol {
-
     override fun findMinHeightTrees(n: Int, edges: Array<IntArray>): List<Int> {
         if(n==1)
-            return listOf(n-1)
+            return listOf(0)
 
         val heightTable = HashMap<String,Int>()
         for(i in 0 until n) heightTable.put("$i,$i",0)
@@ -84,19 +85,15 @@ class Solution2:Sol {
         val result = HashMap<Int,MutableList<Int>>()
 
         for(node in 0 until n){
-//            println("-----$node-----")
             val nodeHeight = getHeight(node, map, -1, mutableSetOf(node),heightTable)
             result.put(nodeHeight, result.getOrDefault(nodeHeight, mutableListOf()).apply { add(node) })
             minHeight = Math.min(minHeight, nodeHeight)
-//            println("------------")
         }
 
         return result.get(minHeight)!!.toList()
     }
 
     private fun getHeight(node:Int, map:HashMap<Int,MutableList<Int>>, level:Int, passedSet:MutableSet<Int>, table:HashMap<String,Int>):Int{
-//        println("node:$node, passedSet:$passedSet")
-
         passedSet.add(node)
         if(passedSet.containsAll(map.get(node)!!)) {
             return level + 1
@@ -106,16 +103,13 @@ class Solution2:Sol {
                 if (passedSet.contains(child)) continue
 
                 if (table.containsKey("$node,$child")){
-//                    println("done: table[$node][$child] = ${table[node][child]}")
                     height = Math.max(height, table.get("$node,$child")!!+(level+1))
                 }else {
                     val subHeight = getHeight(child, map, level + 1, passedSet, table)
                     height = Math.max(height, subHeight)
-//                    println("record: table[$node][$child] = ${subHeight-(level+1)}")
                     table.put("$node,$child",subHeight-(level+1))
                 }
             }
-//            println("height:$height")
             return height
         }
     }
@@ -125,21 +119,38 @@ class Solution3:Sol {
 
     override fun findMinHeightTrees(n: Int, edges: Array<IntArray>): List<Int> {
         if (n == 1)
-            return listOf(n - 1)
+            return listOf(0)
 
-        val map = Array<MutableList<Int>>(n){ mutableListOf()}
+        val map = List<MutableSet<Int>>(n){ mutableSetOf() }
         for(edge in edges){
             map[edge[0]].add(edge[1])
             map[edge[1]].add(edge[0])
         }
 
-        while (true){
-            val set = mutableSetOf<Int>()
-            for(node in map){
-
-            }
-
+        val leafQueue = LinkedList<Int>()
+        for(nodeIndex in map.indices){
+            if(map[nodeIndex].size==1)
+                leafQueue.add(nodeIndex)
         }
 
+
+        var count = n
+        while (count>2){
+            count -= leafQueue.size
+            val originSize = leafQueue.size
+            repeat(originSize){
+                val node = leafQueue.poll()
+
+                val onlyConnectedNode = map[node].elementAt(0)
+                //先消滅leaf自己的紀錄
+                map[node].remove(onlyConnectedNode)
+                //再消滅同伴的紀錄
+                map[onlyConnectedNode].remove(node)
+                if(map[onlyConnectedNode].size==1)
+                    leafQueue.add(onlyConnectedNode)
+
+            }
+        }
+        return leafQueue.toList()
     }
 }
