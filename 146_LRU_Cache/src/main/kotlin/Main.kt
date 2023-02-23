@@ -16,6 +16,7 @@ Input
 [[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]
 Output
 [null, null, null, 1, null, -1, null, -1, 3, 4]
+[null,null,null,1,null,2,null,1,3,4]
 
 Explanation
 LRUCache lRUCache = new LRUCache(2);
@@ -47,50 +48,69 @@ fun main(args: Array<String>) {
 }
 
 class LRUCache(private val capacity: Int) {
-    var count = 0
-    var hashmap:HashMap<Int, Node> = hashMapOf()
+    var hashmap:HashMap<Int, Node?> = hashMapOf()
     var head:Node? = null
 
+    private fun removeNode(node: Node){
+        if(node == head)
+            head = null
+        else{
+            node.prev?.next = node.next
+            node.next?.prev = node.prev
+        }
+    }
+
+    private fun putNodeToHead(node:Node, isNewNode:Boolean){
+        if(head == node)
+            return
+
+        //先拔掉
+        if(!isNewNode && head!=null){
+            removeNode(node)
+        }
+
+        //再接上
+        if(head!=null) {
+            //tail reconnect
+            val tail = head?.prev
+            tail?.next = node
+            head?.prev = node
+
+            node.next = head
+            node.prev = tail
+        }else{
+            node.next = node
+            node.prev = node
+        }
+        head = node
+    }
+
     fun get(key: Int): Int {
-        if(hashmap.containsKey(key)){
+        if(hashmap.get(key)!=null){
             val node = hashmap.get(key)!!
-            node.next = head!!.next
-            node.prev = head!!.prev
-            head = node
+            putNodeToHead(node, false)
             return node.value
         }else
             return -1
     }
 
     fun put(key: Int, value: Int) {
-        if(hashmap.containsKey(key)){
+        if(hashmap.get(key)!=null){
             val newOne:Node = hashmap.get(key)!!
             newOne.value = value
-            newOne.next = head!!.next
-            newOne.prev = head!!.prev
-            head = newOne
+            putNodeToHead(newOne, false)
         }else{
             val newOne = Node(key, value)
             hashmap.put(key, newOne)
 
-            if(count==0){
-                head = newOne
-                newOne.next = newOne
-                newOne.prev = newOne
-            }
-            else{
-                newOne.next = head!!.next
-                newOne.prev = head!!.prev
-                head = newOne
+            //滿了 先排出
+            if(hashmap.size == capacity) {
+                val tail = head!!.prev!!
+                removeNode(tail)
+                hashmap.put(tail.key, null)
             }
 
-            if(count == capacity) {
-                val tail = head!!.prev
-                tail!!.prev!!.next = tail.next
-                tail!!.next!!.prev = tail.prev
-            }
-            else
-                ++count
+            putNodeToHead(newOne, true)
         }
     }
 
@@ -100,7 +120,6 @@ class LRUCache(private val capacity: Int) {
         var prev:Node? = null,
         var next:Node? = null
     )
-
 }
 
 /**
