@@ -54,86 +54,116 @@ interface Solution{
 }
 
 class MedianFinder:Solution {
-    var minHeap = mutableListOf<Int>()
-    var minHeapBoundary = -1
-    var minHeapSize = minHeapBoundary -0 +1
-
-    var maxHeap = mutableListOf<Int>()
-    var maxHeapBoundary = -1
-    var maxHeapSize = maxHeapBoundary -0 +1
+    var minHeap = MinHeap()
+    var maxHeap = MaxHeap()
 
     override fun addNum(num: Int) {
+        if(minHeap.getSize()==0 || num > minHeap.peek()){
+            minHeap.add(num)
+        }else{
+            maxHeap.add(num)
+        }
 
+        while(Math.abs(minHeap.getSize() - maxHeap.getSize())>1){
+            if(minHeap.getSize()>maxHeap.getSize())
+                maxHeap.add(minHeap.poll())
+            else
+                minHeap.add(maxHeap.poll())
+        }
     }
 
     override fun findMedian(): Double {
-
+        if(minHeap.getSize() == maxHeap.getSize())
+            return (minHeap.peek()+maxHeap.peek()).toDouble()/2
+        else if(minHeap.getSize()>maxHeap.getSize())
+            return minHeap.peek().toDouble()
+        else
+            return maxHeap.peek().toDouble()
     }
 
-    interface Heap{
-        var heap:MutableList<Int>
-        fun heapfy()
-        fun add(num:Int)
-        fun peek():Int
-        fun <T> swap(heap:MutableList<T>, indexA:Int, indexB:Int)
-    }
+    abstract class Heap(){
+        var heap: MutableList<Int> = mutableListOf()
+        fun getSize(): Int = heap.size
 
-    class MinHeap:Heap{
-        override var heap: MutableList<Int> = mutableListOf()
+        abstract fun heapfy()
+        abstract fun poll(): Int
 
-        override fun heapfy() {
-            var index = heap.lastIndex
-            val num = heap.last()
-            while (heap[(index+1)/2-1] < num){
-                swap(heap, (index+1)/2-1, index)
-                index = (index+1)/2-1
-            }
-        }
-
-        override fun add(num: Int) {
+        fun add(num: Int) {
             heap.add(num)
             if(heap.size==1)
                 return
             heapfy()
         }
 
-        override fun peek(): Int  = heap[0]
+        fun peek(): Int  = heap[0]
 
-        override fun <T> swap(heap: MutableList<T>, indexA: Int, indexB: Int) {
+        fun <T> swap(heap: MutableList<T>, indexA: Int, indexB: Int) {
             val tmp = heap[indexA]
             heap[indexA] = heap[indexB]
             heap[indexB] = tmp
         }
     }
 
-    class MaxHeap:Heap{
-        override var heap: MutableList<Int> = mutableListOf()
+    class MinHeap: Heap() {
 
         override fun heapfy() {
             var index = heap.lastIndex
             val num = heap.last()
-            while (heap[(index+1)/2-1] > num){
+            while (index>=0 && heap[(index+1)/2-1] < num){
                 swap(heap, (index+1)/2-1, index)
                 index = (index+1)/2-1
             }
         }
 
-        override fun add(num: Int) {
-            heap.add(num)
-            if(heap.size==1)
-                return
-            heapfy()
-        }
+        override fun poll(): Int {
+            val value = heap.first()
+            heap[0] = heap[heap.lastIndex]
+            heap.removeAt(heap.lastIndex)
 
-        override fun peek(): Int  = heap[0]
+            var pointer = 0
+            while ((((pointer+1)*2-1)<heap.size && heap[(pointer+1)*2-1] < heap[pointer]) || (((pointer+1)*2)<heap.size && heap[(pointer+1)*2] < heap[pointer])){
+                if(heap[(pointer+1)*2-1] < heap[pointer]) {
+                    swap(heap, (pointer+1)*2-1, pointer)
+                    pointer = (pointer + 1) * 2 - 1
+                }else {
+                    swap(heap, (pointer+1)*2, pointer)
+                    pointer = (pointer + 1) * 2
+                }
+            }
 
-        override fun <T> swap(heap: MutableList<T>, indexA: Int, indexB: Int) {
-            val tmp = heap[indexA]
-            heap[indexA] = heap[indexB]
-            heap[indexB] = tmp
+            return value
         }
     }
 
+    class MaxHeap: Heap() {
+        override fun heapfy() {
+            var index = heap.lastIndex
+            val num = heap.last()
+            while (index>=0 && heap[(index+1)/2-1] > num){
+                swap(heap, (index+1)/2-1, index)
+                index = (index+1)/2-1
+            }
+        }
+
+        override fun poll(): Int {
+            val value = heap.first()
+            heap[0] = heap[heap.lastIndex]
+            heap.removeAt(heap.lastIndex)
+
+            var pointer = 0
+            while ((((pointer+1)*2-1)<heap.size && heap[(pointer+1)*2-1] > heap[pointer]) || (((pointer+1)*2)<heap.size && heap[(pointer+1)*2] > heap[pointer])){
+                if(heap[(pointer+1)*2-1] > heap[pointer]) {
+                    swap(heap, (pointer+1)*2-1, pointer)
+                    pointer = (pointer + 1) * 2 - 1
+                }else {
+                    swap(heap, (pointer+1)*2, pointer)
+                    pointer = (pointer + 1) * 2
+                }
+            }
+
+            return value
+        }
+    }
 }
 
 /**
