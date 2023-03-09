@@ -1,4 +1,5 @@
 import java.util.*
+import kotlin.math.min
 
 /*
 295. Find Median from Data Stream
@@ -53,19 +54,57 @@ interface Solution{
     fun findMedian(): Double
 }
 
+class MedianFinderPriorityQueue{
+    //poll拿出最大的
+    private val heapSmallerPart = PriorityQueue<Int>{a, b -> b - a}
+    //priority queue預設就是從最小開始拿
+    private val heapBiggerPart = PriorityQueue<Int>()
+
+    fun addNum(num: Int) {
+        if(heapBiggerPart.size ==0 || num > heapBiggerPart.peek()){
+            heapBiggerPart.offer(num)
+        }else
+            heapSmallerPart.offer(num)
+
+        //balanced
+        if(heapBiggerPart.size - heapSmallerPart.size>1){
+            heapSmallerPart.offer(heapBiggerPart.poll())
+        }
+        else if(heapSmallerPart.size - heapBiggerPart.size>1){
+            heapBiggerPart.offer(heapSmallerPart.poll())
+        }
+    }
+
+    fun findMedian(): Double {
+        return if(heapBiggerPart.size > heapSmallerPart.size){
+            heapBiggerPart.peek().toDouble()
+        }else if(heapBiggerPart.size < heapSmallerPart.size){
+            heapSmallerPart.peek().toDouble()
+        }else{
+            (heapSmallerPart.peek()+heapBiggerPart.peek()).toDouble()/2
+        }
+    }
+}
+
 class MedianFinder:Solution {
+    //放數字比較大的那一半
     var minHeap = MinHeap()
+    //放數字比較小的那一半
     var maxHeap = MaxHeap()
 
     override fun addNum(num: Int) {
+        //第一個元素預設就是先塞minHeap
+        //如果這個數字比"數字比較大的那一半"中 最小的一位 還要大，那就放入"數字比較大的那一半"
         if(minHeap.getSize()==0 || num > minHeap.peek()){
             minHeap.add(num)
-        }else{
-            maxHeap.add(num)
         }
+        //反之 如果這個數字比"數字比較小的那一半"中 最大的一位 還要小，那就放入"數字比較小的那一半"
+        else
+            maxHeap.add(num)
 
+        //兩個heap要平衡高度，如果兩邊數量差超過1
         while(Math.abs(minHeap.getSize() - maxHeap.getSize())>1){
-            if(minHeap.getSize()>maxHeap.getSize())
+            if (minHeap.getSize() > maxHeap.getSize())
                 maxHeap.add(minHeap.poll())
             else
                 minHeap.add(maxHeap.poll())
@@ -73,20 +112,39 @@ class MedianFinder:Solution {
     }
 
     override fun findMedian(): Double {
-        if(minHeap.getSize() == maxHeap.getSize())
-            return (minHeap.peek()+maxHeap.peek()).toDouble()/2
-        else if(minHeap.getSize()>maxHeap.getSize())
-            return minHeap.peek().toDouble()
+        //兩個heap數量一樣多，代表data總數是偶數，回傳最中間的兩位平均和
+        return if(minHeap.getSize() == maxHeap.getSize())
+            (minHeap.peek() + maxHeap.peek()).toDouble()/2
+        //比較多的那一方poll出來
+        else if(minHeap.getSize() > maxHeap.getSize())
+            minHeap.peek().toDouble()
         else
-            return maxHeap.peek().toDouble()
+            maxHeap.peek().toDouble()
     }
 
-    abstract class Heap(){
-        var heap: MutableList<Int> = mutableListOf()
-        fun getSize(): Int = heap.size
-
+    abstract class Heap{
+        val heap: MutableList<Int> = mutableListOf()
+        //預設是把最後一位調整好
         abstract fun heapfy()
-        abstract fun poll(): Int
+        abstract fun poll():Int
+
+        fun print(){
+            println(heap)
+        }
+
+        fun getSize():Int = heap.size
+
+        fun getParentIndex(index:Int): Int {
+            return if (((index+1)/2-1) in 0..heap.lastIndex) (index+1)/2-1 else -1
+        }
+
+        fun getLeftChildIndex(index:Int):Int{
+            return if((index+1)*2-1 in 0..heap.lastIndex) (index+1)*2-1 else -1
+        }
+
+        fun getRightChildIndex(index:Int):Int{
+            return if((index+1)*2 in 0..heap.lastIndex) (index+1)*2 else -1
+        }
 
         fun add(num: Int) {
             heap.add(num)
@@ -105,62 +163,114 @@ class MedianFinder:Solution {
     }
 
     class MinHeap: Heap() {
-
         override fun heapfy() {
             var index = heap.lastIndex
             val num = heap.last()
-            while (index>=0 && heap[(index+1)/2-1] < num){
-                swap(heap, (index+1)/2-1, index)
-                index = (index+1)/2-1
+            while (getParentIndex(index)!=-1 && heap[getParentIndex(index)] > num){
+                swap(heap, getParentIndex(index), index)
+                index = getParentIndex(index)
             }
         }
 
+        //排出首位，把尾端元素塞入[0]，再從[0]開始向下調整
         override fun poll(): Int {
-            val value = heap.first()
+            val value:Int = heap[0]
             heap[0] = heap[heap.lastIndex]
             heap.removeAt(heap.lastIndex)
 
-            var pointer = 0
-            while ((((pointer+1)*2-1)<heap.size && heap[(pointer+1)*2-1] < heap[pointer]) || (((pointer+1)*2)<heap.size && heap[(pointer+1)*2] < heap[pointer])){
-                if(heap[(pointer+1)*2-1] < heap[pointer]) {
-                    swap(heap, (pointer+1)*2-1, pointer)
-                    pointer = (pointer + 1) * 2 - 1
-                }else {
-                    swap(heap, (pointer+1)*2, pointer)
-                    pointer = (pointer + 1) * 2
-                }
+            var index = 0
+            while (true){
+                val leftChildIndex = getLeftChildIndex(index)
+                val rightChildIndex = getRightChildIndex(index)
+                    //兩子建在
+                    if(leftChildIndex!=-1 && rightChildIndex!=-1){
+                        //注意這個小於等於，給一個例子：[66, 29, 29]，如果沒有這個小於等於 結果不會正確
+                        if(heap[leftChildIndex] <= heap[rightChildIndex] && heap[leftChildIndex] < heap[index]){
+                            swap(heap, leftChildIndex, index)
+                            index = leftChildIndex
+                        }else if(heap[rightChildIndex] < heap[leftChildIndex] && heap[rightChildIndex] < heap[index]){
+                            swap(heap, rightChildIndex, index)
+                            index = rightChildIndex
+                        }else{
+                            break
+                        }
+                    }
+                    //剩右子
+                    else if(leftChildIndex==-1 && rightChildIndex!=-1){
+                        if(heap[rightChildIndex] < heap[index]){
+                            swap(heap, rightChildIndex, index)
+                            index = rightChildIndex
+                        }else
+                            break
+                    }
+                    //剩左子
+                    else if(leftChildIndex!=-1 && rightChildIndex==-1){
+                        if(heap[leftChildIndex] < heap[index]){
+                            swap(heap, leftChildIndex, index)
+                            index = leftChildIndex
+                        }else
+                            break
+                    }
+                    else{
+                        break
+                    }
             }
-
             return value
         }
     }
 
-    class MaxHeap: Heap() {
+    class MaxHeap:Heap(){
+
         override fun heapfy() {
             var index = heap.lastIndex
             val num = heap.last()
-            while (index>=0 && heap[(index+1)/2-1] > num){
-                swap(heap, (index+1)/2-1, index)
-                index = (index+1)/2-1
+            while (getParentIndex(index)!=-1 && heap[getParentIndex(index)] < num){
+                swap(heap, getParentIndex(index), index)
+                index = getParentIndex(index)
             }
         }
 
         override fun poll(): Int {
-            val value = heap.first()
-            heap[0] = heap[heap.lastIndex]
+            val value = heap[0]
+            heap[0] = heap.last()
             heap.removeAt(heap.lastIndex)
 
-            var pointer = 0
-            while ((((pointer+1)*2-1)<heap.size && heap[(pointer+1)*2-1] > heap[pointer]) || (((pointer+1)*2)<heap.size && heap[(pointer+1)*2] > heap[pointer])){
-                if(heap[(pointer+1)*2-1] > heap[pointer]) {
-                    swap(heap, (pointer+1)*2-1, pointer)
-                    pointer = (pointer + 1) * 2 - 1
-                }else {
-                    swap(heap, (pointer+1)*2, pointer)
-                    pointer = (pointer + 1) * 2
+            var index = 0
+            while (true){
+                val leftChildIndex = getLeftChildIndex(index)
+                val rightChildIndex = getRightChildIndex(index)
+                //兩子建在
+                if(leftChildIndex!=-1 && rightChildIndex!=-1){
+                    if(heap[leftChildIndex] >= heap[rightChildIndex] && heap[leftChildIndex] > heap[index]){
+                        swap(heap, leftChildIndex, index)
+                        index = leftChildIndex
+                    }else if(heap[rightChildIndex] > heap[leftChildIndex] && heap[rightChildIndex] > heap[index]){
+                        swap(heap, rightChildIndex, index)
+                        index = rightChildIndex
+                    }else{
+                        break
+                    }
+                }
+                //剩右子
+                else if(leftChildIndex==-1 && rightChildIndex!=-1){
+                    if(heap[rightChildIndex] > heap[index]){
+                        swap(heap, rightChildIndex, index)
+                        index = rightChildIndex
+                    }else
+                        break
+                }
+                //剩左子
+                else if(leftChildIndex!=-1 && rightChildIndex==-1){
+                    if(heap[leftChildIndex] > heap[index]){
+                        swap(heap, leftChildIndex, index)
+                        index = leftChildIndex
+                    }else
+                        break
+                }
+                else{
+                    break
                 }
             }
-
             return value
         }
     }
