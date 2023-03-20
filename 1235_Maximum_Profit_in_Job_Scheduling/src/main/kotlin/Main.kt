@@ -29,11 +29,11 @@ Constraints:
 interface Sol{
     fun jobScheduling(startTime: IntArray, endTime: IntArray, profit: IntArray): Int
 }
-class Solution{
+class Solution:Sol{
     private val DEBUG = false
     private val hashtable = HashMap<Int, Int>()
 
-    fun jobScheduling(startTime: IntArray, endTime: IntArray, profit: IntArray): Int {
+    override fun jobScheduling(startTime: IntArray, endTime: IntArray, profit: IntArray): Int {
         val array = Array<Node?>(startTime.size){null}
         for(i in startTime.indices){
             array[i] = Node(startTime[i], endTime[i], profit[i])
@@ -83,17 +83,7 @@ class Solution{
     private fun getMaxProfitFromIndex(startTime: List<Int>, endTime: List<Int>, profit: List<Int>, index: Int):Int{
         if(index>startTime.lastIndex)
             return 0
-        //先找起點
-//        val start = startTime[index]
-//        var tmp = index
-//        var count = 1
-//        while (tmp+1<startTime.lastIndex && startTime[tmp+1] == start) {
-//            ++tmp
-//            ++count
-//        }
-//        println("count:$count")
         var maxProfitWithThis = 0
-//        for(i in 0 ..count){
         //debugPrint("index:$index, endTime[$index]:${endTime[index]}")
 
         var nextPeriodStartIndex = binarySearch(endTime[index], startTime, index+1)
@@ -110,7 +100,6 @@ class Solution{
         maxProfitWithThis = Math.max(maxProfitWithThis, maxProfitFromThatIndex)
         //debugPrint("maxProfitWithThis($index), $maxProfitWithThis")
 
-//        }
         val profitWithoutThis = getMaxProfitFromIndex(startTime, endTime, profit, index+1)
         //debugPrint("profitWithoutThis($index), $profitWithoutThis")
 
@@ -156,20 +145,64 @@ class Solution{
     }
 }
 
-//class SolutionDP {
-//
-//    private val hashtable = HashMap<Int, Int>()
-//
-//    fun jobScheduling(startTime: IntArray, endTime: IntArray, profit: IntArray): Int {
-//        val dp = Array<Array<Int>>(startTime.size){Array(startTime.size){0} }
-//
-//        for(i in startTime.indices){
-//            for()
-//        }
-//
-//        return
-//    }
-//}
+class SolutionDP:Sol {
+    override fun jobScheduling(startTime: IntArray, endTime: IntArray, profit: IntArray): Int {
+        //sort first, sort by end time
+        val jobs = Array(startTime.size){IntArray(3)}
+        for(index in startTime.indices){
+            jobs[index] = intArrayOf(startTime[index], endTime[index], profit[index])
+        }
+        jobs.sortBy { it[1] }
+
+        //dp[i]代表：從第一個jod 到 第i個job中 所能產生的最大profit
+        //dp[i] = max(做第i個job, 不做第i個job) = max(第i個job的profit + dp[j], dp[i-1])
+        // 其中j代表：用第i個job的start time，去推算是哪一個job j的endtime與之相同，那就用dp[j]
+        val dp = Array<Int>(jobs.size){0}
+        dp[0] = jobs[0][2]
+
+        for(index in 0 .. jobs.lastIndex){
+            val maxProfitWithoutThisJob = if(index==0) 0 else dp[index-1]
+            var jobJIndex = binarySearch(jobs[index][0], jobs, 0 , index)
+            var maxProfitWithThisJob = jobs[index][2] + if(jobJIndex<0) 0 else dp[jobJIndex]
+
+            val maxProfit = Math.max(maxProfitWithoutThisJob, maxProfitWithThisJob)
+            dp[index] = maxProfit
+        }
+        return dp[jobs.lastIndex]
+    }
+
+    //變形BS，不只要找到 還要找到endTime為target眾中 最後面的那個，因為dp需求，相同的endTime中我們當然是取越後面的值越好，dp值可能會越大
+    private fun binarySearch(target:Int, source:Array<IntArray>, start:Int = 0, end:Int = source.lastIndex):Int{
+        var head = start
+        var tail = end
+
+        var pointer = -1
+        while (head<=tail){
+            var midIndex = (head + tail)/2
+            if(target == source[midIndex][1]){
+                //中了先不要return
+                pointer = midIndex
+                break
+            }
+            else if(target<source[midIndex][1])
+                tail = midIndex-1
+            else
+                head = midIndex+1
+        }
+
+        //head代表要插入的index，所以要退回一格
+        if(pointer==-1)
+            pointer = head-1
+
+        if(pointer==-1) return -1
+        else{
+            //往後找相同的
+            while (pointer+1< source.size && source[pointer+1][1]==target)
+                ++pointer
+            return pointer
+        }
+    }
+}
 
 fun main(args: Array<String>) {
     println("Hello World!")
