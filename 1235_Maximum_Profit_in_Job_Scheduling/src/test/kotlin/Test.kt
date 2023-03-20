@@ -3,7 +3,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class Test {
-    lateinit var solution:Sol
+    lateinit var solution:Solution
 
     @Before
     fun setup(){
@@ -36,4 +36,23 @@ class Test {
         val expectation = 6
         assertEquals(expectation, solution.jobScheduling(startTime, endTime, profit))
     }
+
+    @Test
+    fun test04(){
+        val startTime = intArrayOf(4,2,4,8,2)
+        val endTime = intArrayOf(5,5,5,10,8)
+        val profit = intArrayOf(1,2,8,10,4)
+        val expectation = 18
+        assertEquals(expectation, solution.jobScheduling(startTime, endTime, profit))
+    }
+
+    @Test
+    fun test05(){
+        val startTime = intArrayOf(6,15,7,11,1,3,16,2)
+        val endTime = intArrayOf(19,18,19,16,10,8,19,8)
+        val profit = intArrayOf(2,9,1,19,5,7,3,19)
+        val expectation = 41
+        assertEquals(expectation, solution.jobScheduling(startTime, endTime, profit))
+    }
+
 }
