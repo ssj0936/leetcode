@@ -7,7 +7,7 @@ class Test {
 
     @Before
     fun setup(){
-        solution = Solution()
+        solution = SolutionStack()
     }
 
     @Test
@@ -21,6 +21,13 @@ class Test {
     fun test02(){
         val height = intArrayOf(2,4)
         val expectation = 4
+        assertEquals(expectation, solution.largestRectangleArea(height))
+    }
+
+    @Test
+    fun test03(){
+        val height = intArrayOf(0, 9)
+        val expectation = 9
         assertEquals(expectation, solution.largestRectangleArea(height))
     }
 }

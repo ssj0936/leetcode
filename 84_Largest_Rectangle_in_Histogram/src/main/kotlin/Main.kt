@@ -25,8 +25,8 @@ interface Sol {
     fun largestRectangleArea(heights: IntArray): Int
 }
 
-class Solution {
-    fun largestRectangleArea(heights: IntArray): Int {
+class Solution:Sol {
+    override fun largestRectangleArea(heights: IntArray): Int {
         var maxRectangleSize = Int.MIN_VALUE
         for(i in heights.indices){
             val leftSideLength = heights[i]
@@ -53,6 +53,47 @@ class Solution {
 
         return maxRectangleSize
     }
+}
+
+class SolutionStack:Sol {
+    override fun largestRectangleArea(heights: IntArray): Int {
+        val stack = ArrayDeque<Int>()
+        val newHeights = heights.toMutableList().apply {
+            add(0,0)
+            add(this.size,0)
+        }
+
+        stack.push(0)
+
+        var maxArea = 0
+        for (index in 1 .. newHeights.lastIndex){
+            println("index:$index, height:${newHeights[index]}")
+            val thisValue = newHeights[index]
+            //空的 或是stacktop比自己小，直接push
+            if(stack.isEmpty() || newHeights[stack.peek()!!] < thisValue){
+                println("push")
+                stack.push(index)
+            }else{
+                //如果沒有比自己小
+                //那就把前面的一個一個pop出來，把自己的index與前前一位的index 算出width，再乘上前一位的height
+                while (newHeights[stack.peek()!!]>thisValue){
+                    val heightIndex = stack.poll()
+                    val stackTopHeight = newHeights[heightIndex]
+                    val rectangleLeftBound = stack.peek()?:0
+                    val area = stackTopHeight * (index-rectangleLeftBound-1)
+                    println("heightIndex:$heightIndex, stackTopHeight:$stackTopHeight, rectangleLeftBound:$rectangleLeftBound, area:$area")
+                    maxArea = Math.max(maxArea, area)
+                }
+                stack.push(index)
+            }
+            println(stack)
+        }
+        return maxArea
+    }
+
+    private fun <T> ArrayDeque<T>.push(el:T) = this.addLast(el)
+    private fun <T> ArrayDeque<T>.poll():T = this.removeLast()
+    private fun <T> ArrayDeque<T>.peek():T? = this.lastOrNull()
 }
 fun main(args: Array<String>) {
     println("Hello World!")
