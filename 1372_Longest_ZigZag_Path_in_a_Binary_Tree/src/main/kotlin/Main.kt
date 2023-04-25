@@ -27,7 +27,10 @@ class Solution {
     fun longestZigZag(root: TreeNode?): Int {
         if(root==null)
             return max
-        maxZigZag(root, DIRECTION_LEFT)
+//        maxZigZag(root, DIRECTION_LEFT)
+        maxZigZag(root, DIRECTION_LEFT,0)
+        maxZigZag(root, DIRECTION_RIGHT,0)
+
         return max
     }
 
@@ -42,5 +45,20 @@ class Solution {
         max = maxOf(maxOf(resultRight, resultLeft), max)
 
         return if(direction == DIRECTION_LEFT) resultLeft else resultRight
+    }
+
+    private fun maxZigZag(node:TreeNode?, direction:Int, length:Int = 0){
+        if(node == null) {
+            max = maxOf(max, length - 1)
+            return
+        }
+
+        if(direction == DIRECTION_LEFT) {
+            maxZigZag(node.left, DIRECTION_RIGHT, length + 1)
+            maxZigZag(node.right, DIRECTION_LEFT, 1)
+        }else{
+            maxZigZag(node.right, DIRECTION_LEFT, length + 1)
+            maxZigZag(node.left, DIRECTION_RIGHT, 1)
+        }
     }
 }
