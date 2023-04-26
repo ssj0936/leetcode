@@ -56,7 +56,7 @@ class SolutionBetter:Sol {
                         res[i].add(mutableListOf(s.substring(i..j)))
                     else
                         for(combination in res[j+1]){
-                            res[i].add(mutableListOf(s.substring(i..j)) + combination)
+                            res[i].add(combination.toMutableList().apply {add(0, s.substring(i..j))  })
                         }
                 }
             }
@@ -81,26 +81,58 @@ class Solution:Sol {
             }
         }
 
-        return divideAndConquer(s, 0, s.lastIndex, dp)?: listOf()
+        return divideAndConquer(s, 0, s.lastIndex, dp)
     }
 
-    private fun divideAndConquer(s:String, start:Int, end:Int, dp:Array<BooleanArray>):List<List<String>>?{
-        if(start>end) return null
+    private fun divideAndConquer(s:String, start:Int, end:Int, dp:Array<BooleanArray>):List<List<String>>{
+        if(start>end) return listOf()
 
         val result = mutableListOf<List<String>>()
         for(i in start .. end){
             if(!dp[start][i]) continue
 
             val listOfStrings = divideAndConquer(s, i+1, end, dp)
-            if(listOfStrings!=null){
+            if(listOfStrings.isNotEmpty()){
                 for(strings in listOfStrings){
-                    result.add(mutableListOf(s.substring(start..i))+strings)
+                    result.add(
+                        strings.toMutableList().apply { add(0,s.substring(start..i))}
+//                        mutableListOf(s.substring(start..i))+strings
+                    )
                 }
             }else{
                 result.add(mutableListOf(s.substring(start..i)))
             }
         }
 
-        return if(result.isEmpty()) null else result
+        return result
+    }
+}
+
+class SolutionModification:Sol {
+    private val result = mutableListOf<List<String>>()
+    fun partition(s: String): List<List<String>> {
+        //DP first to know i..j is palindrome or not
+        val dp = Array(s.length){BooleanArray(s.length)}
+        for(i in s.lastIndex downTo 0){
+            for(j in i .. s.lastIndex){
+                if(i == j) dp[i][j] = true
+                else if(s[i]==s[j]){
+                    dp[i][j] = if(j-i==1) true else dp[i+1][j-1]
+                }
+            }
+        }
+
+        divideAndConquer(s, 0, s.lastIndex, mutableListOf(), dp)
+        return result
+    }
+
+    private fun divideAndConquer(s:String, start:Int, end:Int, res:List<String>, dp:Array<BooleanArray>){
+        if(start>end)
+            result.add(res)
+
+        for(i in start .. end){
+            if(!dp[start][i]) continue
+            divideAndConquer(s, i+1, end, res.toMutableList().apply { add(s.substring(start..i)) },dp)
+        }
     }
 }
