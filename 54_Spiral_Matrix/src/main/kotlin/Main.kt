@@ -124,3 +124,30 @@ class Solution01:Sol {
     fun Pair<Int,Int>.x() = this.first
     fun Pair<Int,Int>.y() = this.second
 }
+
+class Solution20230509:Sol {
+    private val dir = arrayOf(Pair(0,1),Pair(1,0),Pair(0,-1),Pair(-1,0))//left, down, right, up
+
+    override fun spiralOrder(matrix: Array<IntArray>): List<Int> {
+        val result = mutableListOf<Int>()
+        val size = intArrayOf(matrix.size, matrix[0].size)
+        var ptrI = 0
+        var ptrJ = -1
+        var dirPtr = 0
+        var sizePtr = 1
+        var count = matrix.size * matrix[0].size
+        while (size[sizePtr]!=0){
+            repeat(size[sizePtr]){
+                ptrI += dir[dirPtr].first
+                ptrJ += dir[dirPtr].second
+
+                result.add(matrix[ptrI][ptrJ])
+                ++count
+            }
+            sizePtr = (sizePtr+1)%2
+            dirPtr = (dirPtr+1)%4
+            --size[sizePtr]
+        }
+        return result
+    }
+}
