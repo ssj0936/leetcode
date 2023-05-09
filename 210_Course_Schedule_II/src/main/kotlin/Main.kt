@@ -12,6 +12,7 @@ class Solution {
         prerequisites.forEach {
             val c = it[0]
             val preClass = it[1]
+            //key = 課程, value = 先修課
             connection.getOrPut(c){mutableSetOf()}.add(preClass)
             result[c] = -1
         }
@@ -32,8 +33,8 @@ class Solution {
             result[queuePtr] = node
             val removed = mutableListOf<Int>()
             connection.forEach {
-                val success = it.value.remove(node)
-                if(success && it.value.size == 0) {
+                it.value.remove(node)
+                if(it.value.size == 0) {
                     removed.add(it.key)
                 }
             }
@@ -45,6 +46,53 @@ class Solution {
             ++queuePtr
         }
         if(queue.size!=numCourses)
+            return intArrayOf()
+
+        return result
+    }
+}
+
+class Solution2 {
+    fun findOrder(numCourses: Int, prerequisites: Array<IntArray>): IntArray {
+        val result = IntArray(numCourses){it}
+
+//        if(prerequisites.isEmpty())
+//            return result
+
+        val graph = Array(numCourses){ mutableListOf<Int>() }
+        val inDegree = IntArray(numCourses){0}
+        prerequisites.forEach {
+            val c = it[0]
+            val preClass = it[1]
+            //key = 課程, value = 先修課
+            graph[preClass].add(c)
+            ++inDegree[c]
+        }
+//        println("inDegree:${inDegree.contentToString()}")
+//        println("graph:${graph.contentToString()}")
+
+        val queue = ArrayDeque<Int>()
+        //find in-degree 0 point
+        inDegree.forEachIndexed { index, it ->
+            if(it == 0)
+                queue.addLast(index)
+        }
+
+        var ptr = 0
+        while (queue.isNotEmpty()){
+
+            val node = queue.removeFirst()
+//            println("node:$node")
+            result[ptr++] = node
+
+            for(nextPoint in graph[node]){
+                if(--inDegree[nextPoint] == 0)
+                    queue.addLast(nextPoint)
+            }
+        }
+//        println(ptr)
+
+        if(ptr != numCourses)
             return intArrayOf()
 
         return result

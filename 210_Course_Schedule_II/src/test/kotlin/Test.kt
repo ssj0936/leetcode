@@ -1,7 +1,7 @@
 import kotlin.test.Test
 
 class Test {
-    val solution = Solution()
+    val solution = Solution2()
 
     @Test
     fun test01(){
@@ -28,6 +28,22 @@ class Test {
     fun test03(){
         val numCourses = 1
         val prerequisites = arrayOf<IntArray>()
+        val result = solution.findOrder(numCourses, prerequisites)
+        println(result.contentToString())
+    }
+
+    @Test
+    fun test04(){
+        val numCourses = 2
+        val prerequisites = arrayOf<IntArray>()
+        val result = solution.findOrder(numCourses, prerequisites)
+        println(result.contentToString())
+    }
+
+    @Test
+    fun test05(){
+        val numCourses = 2
+        val prerequisites = arrayOf(intArrayOf(0,1))
         val result = solution.findOrder(numCourses, prerequisites)
         println(result.contentToString())
     }
