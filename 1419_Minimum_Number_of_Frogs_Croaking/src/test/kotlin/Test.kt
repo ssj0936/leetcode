@@ -2,7 +2,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class Test {
-    val solution = Solution()
+    val solution = Solution3()
 
     @Test
     fun test01(){
