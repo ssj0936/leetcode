@@ -53,31 +53,24 @@ class Solution {
 
 class Solution2 {
     fun maxScore(nums1: IntArray, nums2: IntArray, k: Int): Long {
-        val indexes = IntArray(nums1.size){it}.sortedBy {nums2[it]}
-        println(indexes)
+        val indexes = IntArray(nums1.size){it}.sortedBy {-nums2[it]}
+//        println(indexes)
 
         var sum = 0L
-//        var min = 0
         val minHeap = PriorityQueue<Int>()
         var score = 0L
         for(i in indexes.indices){
-            //push
-            sum += nums1[i].toLong()
-            minHeap.add(nums2[i])
-            println("add:sum:$sum, min:${minHeap.peek()}")
-            //pop
-            if(i >= k){
-                println("remove index${indexes[i-k]}")
-                sum -= nums1[indexes[i-k]]
-                minHeap.remove(nums2[indexes[i-k]])
-                println("removeed:sum:$sum, min:${minHeap.peek()}")
+            val index = indexes[i]
+            if(i<k){
+                sum += nums1[index]
+                minHeap.offer(nums1[index])
+                score = sum * nums2[index]
+            }else if(i>=k && nums1[index]>minHeap.peek()){
+                sum += nums1[index] - minHeap.poll()
+                minHeap.offer(nums1[index])
+                score = maxOf(score, sum * nums2[index])
             }
-
-            score = maxOf(score, sum*minHeap.peek())
-            println("score:$score\n")
         }
-
         return score
-
     }
 }
