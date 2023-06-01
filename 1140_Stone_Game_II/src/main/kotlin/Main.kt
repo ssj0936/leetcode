@@ -8,20 +8,20 @@ fun main(args: Array<String>) {
 class Solution {
     fun stoneGameII(piles: IntArray): Int {
         val n = piles.size
-        val dp = Array(n){IntArray(piles.size+1)}
+        val dp = Array(n){IntArray(n/2+2)}
 
         //sum of piles[i .. n-1]
         var sum = 0
         for(i in n-1 downTo 0){
             sum += piles[i]
-            for(m in 1 .. n){
+            for(m in 1 .. n/2+1){
                 if(i+(2*m)-1 >= n-1)
                     dp[i][m] = sum
                 else{
                     var max = 0
                     for(s in 1 .. 2*m){
-                        if(sum - dp[i+s][maxOf(s,m)] > max)
-                            max = sum - dp[i+s][maxOf(s,m)]
+                        if(sum - dp[i+s][minOf(maxOf(s,m), n/2+1)] > max)
+                            max = sum - dp[i+s][minOf(maxOf(s,m), n/2+1)]
                     }
                     dp[i][m] = max
                 }
