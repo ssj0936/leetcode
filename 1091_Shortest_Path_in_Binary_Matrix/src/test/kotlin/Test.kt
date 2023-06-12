@@ -2,7 +2,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class Test {
-    val solution = SolutionDFS()
+    val solution = SolutionBFS()
 
     @Test
     fun test01(){
@@ -84,6 +84,6 @@ class Test {
         assertEquals(expectation, solution.shortestPathBinaryMatrix(input))
     }
 
-    [[0,0,0,0,1],[1,0,0,0,0],[0,1,0,1,0],[0,0,0,1,1],[0,0,0,1,0]]
+//    [[0,0,0,0,1],[1,0,0,0,0],[0,1,0,1,0],[0,0,0,1,1],[0,0,0,1,0]]
 }
 
