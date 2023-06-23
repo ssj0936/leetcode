@@ -1,7 +1,7 @@
 import kotlin.test.Test
 
 class Test {
-    val solution = SolutionOri()
+    val solution = Solution2()
 
     @Test
     fun test01(){
