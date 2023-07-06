@@ -24,4 +24,11 @@ class Test {
         val expectation = 5
         assertEquals(expectation, solution.calculate(input))
     }
+
+    @Test
+    fun test04(){
+        val input = "0-2147483647"
+        val expectation = -2147483647
+        assertEquals(expectation, solution.calculate(input))
+    }
 }

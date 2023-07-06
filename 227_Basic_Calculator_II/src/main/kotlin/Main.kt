@@ -1,8 +1,9 @@
 import java.util.*
 
-class Solution {
+class SolutionOri {
     fun calculate(s: String): Int {
-        val stack = LinkedList<String>()
+        val numStack = LinkedList<Int>()
+        val operatorStack = LinkedList<Char>()
 
         var i = 0
         while (i<s.length){
@@ -11,37 +12,65 @@ class Solution {
                     ++i
                 }
                 '+', '-', '*', '/' -> {
-                    stack.push(char.toString())
+                    operatorStack.push(char)
                     ++i
                 }
                 else -> {
                     val builder = StringBuilder().apply { append(s[i++]) }
-                    while (i <s.length && s[i].isNumber()){
+                    while (i <s.length && s[i].isDigit()){
                         builder.append(s[i])
                         ++i
                     }
 
                     var number = builder.toString().toInt()
 
-                    while (stack.peek() == "*" || stack.peek()=="/"){
-                        val operator = stack.pop()
-                        val anotherNumber = stack.pop().toInt()
-                        number = if(operator=="*"){anotherNumber * number} else {anotherNumber/number}
+                    while (operatorStack.peek() == '*' || operatorStack.peek()=='/'){
+                        val operator = operatorStack.pop()
+                        val anotherNumber = numStack.pop()
+                        number = if(operator=='*'){anotherNumber * number} else {anotherNumber/number}
                     }
 
-                    stack.push(number.toString())
+                    numStack.push(number)
                 }
             }
         }
-        var base = stack.poll().toInt()
-        while (stack.isNotEmpty()){
-            val operator = stack.poll()
-            val anotherNumber = stack.poll().toInt()
-            base = if(operator=="+"){base + anotherNumber} else {base - anotherNumber}
+        var base = numStack.pollLast()
+        while (numStack.isNotEmpty()){
+            val operator = operatorStack.pollLast()
+            val anotherNumber = numStack.pollLast().toInt()
+            base = if(operator=='+'){base + anotherNumber} else {base - anotherNumber}
         }
 
         return base
     }
+}
 
-    private fun Char.isNumber():Boolean = this in '0'..'9'
+class Solution {
+    fun calculate(s: String): Int {
+        var lastOperator = '+'
+        val stack = LinkedList<Int>()
+        var currentNumber = 0
+        s.forEachIndexed { index, c ->
+
+            if(c.isDigit()){
+                currentNumber = currentNumber*10 + (c-'0')
+            }
+
+            if((!c.isDigit() && c!=' ') || index==s.length-1){
+                when(lastOperator){
+                    '+'-> stack.push(currentNumber)
+                    '-'-> stack.push(-currentNumber)
+                    '*'-> stack.push(stack.pop() * currentNumber)
+                    '/'-> stack.push(stack.pop() / currentNumber)
+                }
+                lastOperator = c
+                currentNumber = 0
+            }
+        }
+
+        var sum = 0
+        while (stack.isNotEmpty()) sum+=stack.pop()
+        return sum
+
+    }
 }
