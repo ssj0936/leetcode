@@ -144,16 +144,16 @@ class CodecNeo:Solution{
             return null
         val newData:MutableList<Any> = ("_," + data.substring(0+1 .. data.lastIndex-1)).split(",").toMutableList()
 
-        println(newData)
+//        println(newData)
         newData[0] = TreeNode(0)
 
         var parentIndex = 0
-        var nullCount = 0
-        var levelElementCount = 1
-        var levelElementCountTmp = levelElementCount
+//        var nullCount = 0
+//        var levelElementCount = 1
+//        var levelElementCountTmp = levelElementCount
 
         for(i in 1..newData.lastIndex){
-            --levelElementCount
+//            --levelElementCount
 
             val value = newData[i].toString().toIntOrNull()
             if(value != null) {
@@ -164,22 +164,22 @@ class CodecNeo:Solution{
                 else {
                     (newData[parentIndex] as TreeNode).right = node
                 }
-            }else{
+            }/*else{
                 ++nullCount
-            }
+            }*/
             //指到parent的右側，代表parent已經完整了，parent index往後
             if(i%2==1) {
                 do{++parentIndex}
                 while (newData[parentIndex].toString() == "null")
             }
-
+            /*
             if(levelElementCount == 0){
 //                parentIndex = i - levelElementCountTmp + 1
 
                 levelElementCount = (levelElementCountTmp - nullCount)*2
                 levelElementCountTmp = levelElementCount
                 nullCount = 0
-            }
+            }*/
         }
         return newData[1] as TreeNode
     }
