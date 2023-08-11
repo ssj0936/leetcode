@@ -62,3 +62,19 @@ class Solution {
         }
     }
 }
+
+class Solution2 {
+    var max = 0
+    fun longestZigZag(root: TreeNode?): Int {
+        foo(root!!)
+        return max
+    }
+
+    //0 ->LEFT 1->RIGHT
+    private fun foo(node:TreeNode):IntArray{
+        var leftCount = if(node.left == null) 0 else foo(node.left!!)[1] + 1
+        var rightCount = if(node.right == null) 0 else foo(node.right!!)[0] + 1
+        max = maxOf(max, leftCount, rightCount)
+        return intArrayOf(leftCount, rightCount)
+    }
+}

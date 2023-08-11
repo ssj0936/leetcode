@@ -7,7 +7,7 @@ class Test {
 
     @BeforeTest
     fun setup(){
-        solution = SolutionDFS()
+        solution = SolutionDAndF()
     }
 
     @Test

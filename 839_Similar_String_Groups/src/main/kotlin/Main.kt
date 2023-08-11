@@ -90,3 +90,48 @@ class SolutionDFS:Sol {
         return true
     }
 }
+
+class SolutionDAndF:Sol {
+    override fun numSimilarGroups(strs: Array<String>): Int {
+        //node -> parent
+        val map = hashMapOf<String, String>()
+        for(i in strs.indices){
+            for(j in i .. strs.lastIndex) {
+                if(i == j) {
+                    if(!map.containsKey(strs[i]))
+                        map[strs[i]] = strs[i]
+                }else{
+                    if(isSimilar(strs[i], strs[j])){
+                        map[strs[j]] = map[strs[i]]!!
+                    }
+                }
+            }
+        }
+//        println(map)
+
+        var rootSet = hashSetOf<String>()
+        for(entry in map){
+            rootSet.add(findRoot(map, entry.key))
+        }
+        return rootSet.size
+    }
+
+    private fun findRoot(map: HashMap<String, String>,node:String):String{
+        var target = node
+        while (map[target] != target){
+            target = map[target]!!
+        }
+        return target
+    }
+
+    private fun isSimilar(s1:String, s2:String):Boolean{
+        var diffCnt = 0
+        for(i in s1.indices){
+            if(s1[i]!=s2[i]) {
+                ++diffCnt
+                if(diffCnt>2) return false
+            }
+        }
+        return true
+    }
+}
