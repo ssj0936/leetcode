@@ -88,3 +88,22 @@ fun main(args: Array<String>) {
     val result = Solution().maxSlidingWindowDeque(input,k)
     println(result.contentToString())
 }
+
+class Solution {
+    fun maxSlidingWindow(nums: IntArray, k: Int): IntArray {
+        val queue = LinkedList<Int>()
+        val result = IntArray(nums.size-k+1)
+        var ptr = 0
+        for(i in nums.indices){
+            if(nums[i]>= queue.last)
+                queue.addLast(nums[i])
+
+            if(i>=2){
+                if(i>2 && nums[i-k] == queue.first)
+                    queue.removeFirst()
+                result[ptr++] = queue.first
+            }
+        }
+        return result
+    }
+}
